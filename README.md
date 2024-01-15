@@ -1,6 +1,4 @@
-# Voorbeeldexamen
-
-In deze repository vind je een eenvoudige implementatie van een chatbox. 
+# Opdracht
 
 Stappen:
 1. Connecteer naar je virtuele machine
