@@ -1,0 +1,46 @@
+version: "3"
+services:
+  frontend:
+    image: nginx
+    volumes:
+      - ./frontend/static:/usr/share/nginx/html
+    networks:
+      - proxy
+    labels:
+      - "traefik.http.routers.web.rule=Host(`s141479.devops-ap.be`)"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
+      - "traefik.docker.network=traefik"
+  
+  backend:
+    image: voorbeeldexamen-chatapi:latest
+    networks:
+      - proxy
+    environment:
+      - MONGO_USER=admin # gegeven in de opdracht
+      - MONGO_PWD=S3cret
+      - MONGO_URL=db  #deze naam moet overal hetzelfde zijn!
+    labels:
+      - "traefik.http.routers.backend.rule=Host(`s141479.devops-ap.be`) && PathPrefix(`/api`)"
+      - "traefik.http.services.backend-service.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.docker.network=traefik"
+
+  db:
+    image: mongo:5.0.6 #mongo image
+    networks:
+      - proxy
+    volumes:
+      - mongo-data:/data/db  # Use a named volume for MongoDB data, zet de naam heirvan bij volumes onderaan
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js  # Init script
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin  # MongoDB root username
+      - MONGO_INITDB_ROOT_PASSWORD=S3cret  # MongoDB root password
+      - MONGO_INITDB_DATABASE=db  # Replace with your desired database name
+networks:
+  proxy:
+    external: true
+    name: traefik
+volumes:
+  mongo-data:
+    
